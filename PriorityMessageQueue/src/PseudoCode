@@ -2,17 +2,97 @@ PSEUDO CODE
 Message
 	int arrival -- measures the duration of time before it arrived
 	int priority 0-4 with 0 being highest priority 
+	String content;
+	int wait;
 	
-PMQ 
-	need a Queue
-			add()
-			peek()
-			remove()
-			isEmpty()
+	Message() {
+		priority = random 0-4;
+		arrival = 0;
+		content = "Message of priority " + priority; 
+	}
+	
+	Message(int p) {
+		priority = p;
+		arrival = 0;
+		content = 
+		"Message of priority " + priority; 
+	}
+	
+	toString() {	return content; }
+	int setWait(int t) { //"global" time
+		wait = t - arrival; --time spent waiting in the queue 
+	}
+	
+PMQ has 5? or is one and have another class with 5...
+	int time = 0;
+	Queue
+		add()
+		peek()
+		remove()
+		isEmpty()
+	
+	Queue p0, p1, p2, p3, p4;
+	ArrayList<Msg> output; //want to iterate over w/o destroying, so just a list
+		
+	void process() {
+		while(!isEmpty && time < 10,000) //the Queues will never empty at this rate, so have a backup catch 
+			if(time % 4 == 0) {
+				/*move to own method 
+				if(p0 !isEmpty) 
+					Message x = pmq0.remove();
+					x.setArrivalTime(time);
+					x.setWait(time);
+					output.add(x)
+				else if (p1 !isEmpty())... repeat for all 5
+				*/
+			}
+			/*move to own method
+			time++;	//every iteration or "minute
+			pqm.add(new Message, time)  
+			*/
+			System.out.print("avg wait time for PMQ: " + analyze() );
+	}
+	
+	add(Message m) { //inserts message int op0-p4 according to m.getPriority
+		if(m.getPriority() == 0) 
+			p0.add(m)
+		...
+		else p4.add(m);
+		
+	}
+	
+	isEmpty() {
+		return p0.isEmpty() && p1.isEmpty() ... && p4.isEmpty();
+	}
+	
+	remove() {
+		if( !p0.isEmpty() )
+			return p0.remove()
+		else if... !p4.isEmpty()
+			return p4.remove();
+		else return null;
+	}
+				
+	int analyze() {
+		double avg = 0;
+		double avg0, avg1, ...avg4;
+		int numM = output.size()-1;
+		for(Message m : output) { 
+			sum avg += m.getWait();
+			if(m.getPriority() == 0 ) 
+				avg0 += m.getWait();
+		}
+		avg = (double) avg / numM;
+		avg0 = (double) avg0 / p0.size();
+
+		--do comparison to Heap
+	} 
+		 	 
 			
 			
-runtime
-	iterate --> update all messages to change their arrival?
-			--> change on removal based on 
-			--> deal with PQM 0 first 
+			
+
+	iterate --> Keep track of num iterations 1i = 1 minute and remove every 4 minutes
+			--> set Message arrival time upon removal from queue
+			--> deal with PQM 0 first --> PQM 4  
 			--> calculate the number of minutes on average for all the PQMs
