@@ -1,0 +1,18 @@
+PSEUDO CODE 
+Message
+	int arrival -- measures the duration of time before it arrived
+	int priority 0-4 with 0 being highest priority 
+	
+PMQ 
+	need a Queue
+			add()
+			peek()
+			remove()
+			isEmpty()
+			
+			
+runtime
+	iterate --> update all messages to change their arrival?
+			--> change on removal based on 
+			--> deal with PQM 0 first 
+			--> calculate the number of minutes on average for all the PQMs
