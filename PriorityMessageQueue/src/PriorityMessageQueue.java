@@ -21,7 +21,7 @@ public class PriorityMessageQueue {
 		for(int i = 0; i < numQs; i++)
 			Qs.add(new LinkedList<Message>() ); //Create 5 Queues
 		time = 0; //keep track of the # minutes that have transpired 
-		output = new ArrayList<Message>(100); //save time resizing later
+		output = new ArrayList<Message>(); //save time resizing later
 	}
 
 	//QUEUE Methods//
@@ -72,6 +72,7 @@ public class PriorityMessageQueue {
 			
 			add(new Message(time) );	//Create a new message every minute //TODO 99% of the Messages are priority 4 even though it should be evenly distr...
 			time++;	//every iteration = 1 minute
+			//System.out.println(toString()); //TODO shows that there are in fact more than 0 messages in p0
 		}
 		//After processing all, output analysis
 		System.out.print( analyze() );
@@ -81,14 +82,16 @@ public class PriorityMessageQueue {
 		String result = "PriorityMessageQueue wait time analysis:";
 		double avg = 0;	//overall avg wait time
 		double[] avgs = new double[numQs]; //stores the avgs for each of the individual pqs
+		int[] msgCount = new int[numQs]; //Keeps track of the # of messages per Queue
 		int numMessages = output.size() - 1;
 		
 		//sum wait times 
 		for(Message m : output) {
 			avg += m.getTimeOfArrival();	//overall avg
 			int p = m.getPriority(); //Queue specific avg
-			if(p == 4) System.out.println(output.indexOf(m) ); //TODO REMOVE THIS DEBUGGING HELPER
+			//if(p == 0) System.out.println(output.indexOf(m) ); //TODO REMOVE THIS DEBUGGING HELPER
 			avgs[p] += m.getTimeOfArrival(); //fill first
+			msgCount[p]++;	//keep track of how many messages in each queue
 		}
 		//divides by total messages
 		avg = (double) avg / numMessages;	//total avg
@@ -98,9 +101,17 @@ public class PriorityMessageQueue {
 
 		for(int i = 0; i < avgs.length; i++ ) {
 			avgs[i] = (double) avgs[i] / numMessages;	//individual pq avg
-			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes";
+			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed";
 		}
 		
+		return result;
+	}
+	
+	public String toString() {
+		String result = "";
+		int i = 0;
+		for(Queue<Message> q : Qs) 
+			result += "q" + i++ + ": " + q.size() + ", ";
 		return result;
 	}
 	
@@ -108,6 +119,8 @@ public class PriorityMessageQueue {
 		//Create some test msgs
 		int nm = 100; //num messages
 		PriorityMessageQueue x = new PriorityMessageQueue(); //test PMQ
+		//TODO make sure that I process the same amount of messages for each pq
+		//int arr[] keep track
  
 		for(int i = 0; i < nm; i++) {
 			x.add( new Message(0) );	//add with beginning time 0
