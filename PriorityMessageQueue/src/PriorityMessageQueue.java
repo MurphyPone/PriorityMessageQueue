@@ -108,7 +108,7 @@ public class PriorityMessageQueue {
 		//Create some test msgs
 		int nm = 100; //num messages
 		PriorityMessageQueue x = new PriorityMessageQueue(); //test PMQ
-
+ 
 		for(int i = 0; i < nm; i++) {
 			x.add( new Message(0) );	//add with beginning time 0
 		}
