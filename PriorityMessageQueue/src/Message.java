@@ -5,24 +5,17 @@
  */
 
 public class Message {
-	private int arrival; //Time of arrival
+	private int arrival; //Arrival in PQM
 	private int priority; //0,4 with 0 being highest priority 
 	private String content; //Content of the message
 	private int wait; //Amount of time before the message was processed
 	
 	//Default constructor assigns random priority
 	Message(int a) {
-		priority = (int) (Math.random()  * 4) + 1; //random priority 0-4;
+		priority = (int) (Math.random() * 5); //random priority 0-4;
 		arrival = a;
 		content = "This Message has priority " + priority; 
 	}
-	
-	/*Constructor which accepts a priority
-	Message(int a, int p) {
-		priority = p;
-		arrival = a;
-		content = "This Message has priority " + priority; 
-	} */
 	
 	// Getters and Setters //
 	public int getArrival() { return arrival; }
@@ -37,5 +30,5 @@ public class Message {
 	public void setWait(int t) { //"global" time passed from the PMQ
 		wait = t - arrival; //time spent waiting in the Queue 
 	}
-	public int getWait() { return this.wait; }
+	public int getTimeOfArrival() { return this.wait; }
 }

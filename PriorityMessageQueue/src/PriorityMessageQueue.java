@@ -4,6 +4,7 @@
  * @date 4/16/18
  */
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
@@ -17,6 +18,8 @@ public class PriorityMessageQueue {
 	//Constructor
 	PriorityMessageQueue() {
 		Qs = new ArrayList<Queue<Message>>(numQs);	//Instantiate the Qs
+		for(int i = 0; i < numQs; i++)
+			Qs.add(new LinkedList<Message>() ); //Create 5 Queues
 		time = 0; //keep track of the # minutes that have transpired 
 		output = new ArrayList<Message>(100); //save time resizing later
 	}
@@ -67,7 +70,7 @@ public class PriorityMessageQueue {
 			if(time % 4 == 0)  //every 4 minutes
 				output.add( remove() );	//Add the highest priority message to the Queue 		
 			
-			add(new Message(time) );	//Create a new message every minute
+			add(new Message(time) );	//Create a new message every minute //TODO 99% of the Messages are priority 4 even though it should be evenly distr...
 			time++;	//every iteration = 1 minute
 		}
 		//After processing all, output analysis
@@ -75,20 +78,24 @@ public class PriorityMessageQueue {
 	}
 	
 	public String analyze() {
-		String result = "PriorityMessageQueue wait time analysis";
-		double avg = 0;
-		double[] avgs = new double[numQs];
+		String result = "PriorityMessageQueue wait time analysis:";
+		double avg = 0;	//overall avg wait time
+		double[] avgs = new double[numQs]; //stores the avgs for each of the individual pqs
 		int numMessages = output.size() - 1;
 		
 		//sum wait times 
 		for(Message m : output) {
-			avg += m.getWait();	//overall avg
+			avg += m.getTimeOfArrival();	//overall avg
 			int p = m.getPriority(); //Queue specific avg
-			avgs[p] += m.getWait(); //fill first
+			if(p == 4) System.out.println(output.indexOf(m) ); //TODO REMOVE THIS DEBUGGING HELPER
+			avgs[p] += m.getTimeOfArrival(); //fill first
 		}
 		//divides by total messages
 		avg = (double) avg / numMessages;	//total avg
+		//Build String
+		result += "\n\t" + numMessages + " Messages processed in " + time + " minutes";
 		result += "\n\tOverall avg: " + avg + " minutes";
+
 		for(int i = 0; i < avgs.length; i++ ) {
 			avgs[i] = (double) avgs[i] / numMessages;	//individual pq avg
 			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes";
@@ -102,9 +109,9 @@ public class PriorityMessageQueue {
 		int nm = 100; //num messages
 		PriorityMessageQueue x = new PriorityMessageQueue(); //test PMQ
 
-		for(int i = 0; i < nm; i++) 
+		for(int i = 0; i < nm; i++) {
 			x.add( new Message(0) );	//add with beginning time 0
-		
+		}
 		x.process();
 	}
 }
