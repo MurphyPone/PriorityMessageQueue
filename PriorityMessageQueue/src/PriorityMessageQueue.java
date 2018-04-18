@@ -59,6 +59,8 @@ public class PriorityMessageQueue {
 			if( !q.isEmpty() ) {		//Find first Queue that isn't empty
 				Message m = q.remove();
 				m.setWait(time);		//Calculate how long it has been waiting
+				System.out.println("current time - arrival time = " + (time - m.getTimeOfArrival()) );
+				m.updateContent();	//Changes the toString display info 
 				return m; //Return the configured message 
 			}
 		}
@@ -78,13 +80,14 @@ public class PriorityMessageQueue {
 		
 		//Create all the messages
 		for(int i = 0; i < limit; i++) {
-			add(new Message(i) ); //Add one new message for every minute; i = time, without incrementing time
+			add(new Message(i) ); //Add one new message for every minute; i = time, without incrementing time		
 		}
 		
 		//Process
 		while( !isEmpty() ) {
-			if(time % 4 == 0) 
+			if(time % 4 == 0) { 
 				output.add( remove() );
+			}
 			time++;
 		}
 		

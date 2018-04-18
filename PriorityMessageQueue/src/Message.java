@@ -27,6 +27,9 @@ public class Message {
 	public void setContent(String content) { this.content = content; }
 
 	public String toString() {	return content; }
+	public void updateContent() { this.content += ", and waited " + this.wait + " minutes";  }
+	
+	
 	public void setWait(int t) { //"global" time passed from the PMQ
 		wait = t - arrival; //time spent waiting in the Queue 
 	}
