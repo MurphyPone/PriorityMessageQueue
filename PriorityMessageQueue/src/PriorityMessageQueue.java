@@ -59,8 +59,8 @@ public class PriorityMessageQueue {
 			if( !q.isEmpty() ) {		//Find first Queue that isn't empty
 				Message m = q.remove();
 				m.setWait(time);		//Calculate how long it has been waiting
-				System.out.println("current time - arrival time = " + (time - m.getTimeOfArrival()) );
 				m.updateContent();	//Changes the toString display info 
+				System.out.println((time - m.getArrival()) + ", " + m.getTimeOfArrival() );
 				return m; //Return the configured message 
 			}
 		}
