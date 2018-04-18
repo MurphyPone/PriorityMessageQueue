@@ -10,8 +10,8 @@ import java.util.Queue;
 
 public class PriorityMessageQueue {
 	private static final int numQs = 5;
-	private int time;
-	//Could add global priority cap var --> Messages as well
+	private int time;	//Keeps track of iterations/minutes elapsed in the processing of Messages
+	private int limit; //How long the PMQ will run (unless empty), before stopping the process
 	private ArrayList<Queue<Message>> Qs;//The Queues for Messages to be stored within
 	private ArrayList<Message> output;
 
@@ -21,16 +21,17 @@ public class PriorityMessageQueue {
 		for(int i = 0; i < numQs; i++)
 			Qs.add(new LinkedList<Message>() ); //Create 5 Queues
 		time = 0; //keep track of the # minutes that have transpired 
-		output = new ArrayList<Message>(); //save time resizing later
+		limit = 10000; //minutes
+		output = new ArrayList<Message>(limit); //save time resizing later
 	}
 
 	//QUEUE Methods//
 	
 	//Add -- according to Message priority
-	public void add(Message m) {
+	public void add( Message m ) {
 		int p = m.getPriority();	//get priority of item to be added
 		Queue<Message> pq = Qs.get(p);	//Get the specific PriorityQueue
-		pq.add(m);	//Add the message to the Queue associated with that priority 
+		pq.add(m);	//Add the message to the Queue (LinkedList) associated with that priority 
 	}
 	
 	//Peek -- returns highest priority message
@@ -52,55 +53,59 @@ public class PriorityMessageQueue {
 	
 	//Remove highest priority
 	public Message remove() {
-		Message m = null;	//init as null to check if exists later
-		for(Queue<Message> q : Qs) {		
+		Queue<Message> q;
+		for(int i = 0; i < numQs; i++) { //force the order bc for each doesn't seem to be ordered
+			q = Qs.get(i);
 			if( !q.isEmpty() ) {		//Find first Queue that isn't empty
-				m = q.remove();	//Snatch the message
+				Message m = q.remove();
 				m.setWait(time);		//Calculate how long it has been waiting
+				return m; //Return the configured message 
 			}
 		}
-		if(m != null) 
-			return m;
-		else 
-			throw new NoSuchElementException();
+		throw new NoSuchElementException();
 	}
 	
 	//Process 
 	public void process() {
-		while( !isEmpty() ) { //TODO re-Add condition to stop after x minutes
+		/* old
+		while( !isEmpty() && time < limit) { 
 			if(time % 4 == 0) {   //every 4 minutes
-				output.add( remove() );	//Add the highest priority message to the Queue 		
+				output.add( remove() );	//Add the highest priority message to the Queue
 			}
-			
-			//add(new Message(time) );	//Create a new message every minute //TODO 99% of the Messages are priority 4 even though it should be evenly distr...
+			add( new Message(time) );	//Create a new message every minute 
 			time++;	//every iteration = 1 minute
-			//System.out.println(toString());
+		} */
+		
+		//Create all the messages
+		for(int i = 0; i < limit; i++) {
+			add(new Message(i) ); //Add one new message for every minute; i = time, without incrementing time
 		}
-		//After processing all, output analysis
-		System.out.print( analyze() );
+		
+		//Process
+		while( !isEmpty() ) {
+			if(time % 4 == 0) 
+				output.add( remove() );
+			time++;
+		}
+		
+		System.out.print( analyze() ); //After processing all, output analysis
 	}
 	
 	public String analyze() {
 		String result = "PriorityMessageQueue wait time analysis:";
-		double avg = 0;	//overall avg wait time
-		double[] avgs = new double[numQs]; //stores the avgs for each of the individual pqs
+		int numMessages = output.size(); //Tracks total # messages processed
+		double[] avgs = new double[numQs]; //stores the avg time for Messages within each of the individual pQueues
 		int[] msgCount = new int[numQs]; //Keeps track of the # of messages per Queue
-		int numMessages = output.size();
 		
 		//sum wait times 
-		for(Message m : output) {
-			avg += m.getTimeOfArrival();	//overall avg
+		for(Message m : output) {  
 			int p = m.getPriority(); //Queue specific avg
-			//if(p == 0) System.out.println(output.indexOf(m) ); //TODO REMOVE THIS DEBUGGING HELPER
 			avgs[p] += m.getTimeOfArrival(); //fill first
 			msgCount[p]++;	//keep track of how many messages in each queue
 		}
-		
-		//divides by total messages
-		avg = (double) avg / numMessages;	//total avg
+				
 		//Build String
 		result += "\n\t" + numMessages + " Messages processed in " + time + " minutes";
-		result += "\n\tOverall avg: " + avg + " minutes";
 
 		for(int i = 0; i < avgs.length; i++ ) {
 			avgs[i] = (double) avgs[i] / numMessages;	//individual pq avg
@@ -120,38 +125,7 @@ public class PriorityMessageQueue {
 	}
 	
 	public static void main(String[] args) {
-		//Create some test msgs
-		int nm = 100; //num messages
 		PriorityMessageQueue x = new PriorityMessageQueue(); //test PMQ
-		
-		//debugging tracker
-		int[] priorityTracker = new int[5];
-		int[] actual = new int[5];
-		//
- 
-		//Add initial messages
-		for(int i = 0; i < nm; i++) {
-			int makeSureThatTheyHaveARandomPriority = (int) (Math.random() * 5);
-			priorityTracker[makeSureThatTheyHaveARandomPriority]++; //Debugging tracker
-			Message m = new Message(0); //add with beginning time 0
-			m.setPriority(makeSureThatTheyHaveARandomPriority);
-			x.add( m );	
-		}
-		
 		x.process();
-		
-		//Debugging tracker
-		for(Message m : x.output) {
-			int p = m.getPriority();
-			actual[p]++;
-		}
-		
-		for(int i = 0; i < 5; i++) {
-			String r = "\nProjected q" + i + ": " + priorityTracker[i];
-				r += "\nActual q" + i + ": " + actual[i];
-			System.out.println(r);
-		} 
-		//End debugging tracker --> pulling hair out
-			
 	}
 }
