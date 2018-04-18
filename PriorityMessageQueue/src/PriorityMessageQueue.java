@@ -57,11 +57,15 @@ public class PriorityMessageQueue {
 		for(int i = 0; i < numQs; i++) { //force the order bc for each doesn't seem to be ordered
 			q = Qs.get(i);
 			if( !q.isEmpty() ) {		//Find first Queue that isn't empty
-				Message m = q.remove();
+				Message m = q.peek();
 				m.setWait(time);		//Calculate how long it has been waiting
-				m.updateContent();	//Changes the toString display info 
-				System.out.println((time - m.getArrival()) + ", " + m.getTimeOfArrival() );
-				return m; //Return the configured message 
+				if(m.getArrivalTime() >= 4) {
+					m = q.remove();
+					m.setWait(time);		//Calculate how long it has been waiting
+					return m; //Return the configured message 
+				} else { 
+					System.out.println( m );
+				}
 			}
 		}
 		throw new NoSuchElementException();
@@ -69,29 +73,26 @@ public class PriorityMessageQueue {
 	
 	//Process 
 	public void process() {
-		/* old
-		while( !isEmpty() && time < limit) { 
-			if(time % 4 == 0) {   //every 4 minutes
-				output.add( remove() );	//Add the highest priority message to the Queue
-			}
-			add( new Message(time) );	//Create a new message every minute 
-			time++;	//every iteration = 1 minute
-		} */
+		//Pre-populate
+		for(int i = 0; i < 10; i++ ) 
+			add (new Message(time++));	//Add 10 Messages to start
 		
-		//Create all the messages
-		for(int i = 0; i < limit; i++) {
-			add(new Message(i) ); //Add one new message for every minute; i = time, without incrementing time		
-		}
-		
-		//Process
-		while( !isEmpty() ) {
-			if(time % 4 == 0) { 
+		//Populate and process
+		while (time < limit) {	//Add another <limit = 10,000> Messages and begin to process
+			add(new Message( time++ ) ); //Add one new, random Message every minute and increment the time counter		//Confirmation # for boutineer 6146
+
+			if (time % 4 == 0)	//Remove the highest priority Message every 4 minutes
 				output.add( remove() );
-			}
-			time++;
 		}
 		
-		System.out.print( analyze() ); //After processing all, output analysis
+		//Process until empty
+		while ( !isEmpty() ) {	//While the PMQ has Messages in it
+			output.add(remove() );	//Remove them in order of priority, and add to the output for calculations
+			time += 4;	//Increment time by 4 to continue to keep track of the avg wait time 
+		}
+		
+		//Analyze
+		System.out.print( analyze() ); //After processing all, output analysis		
 	}
 	
 	public String analyze() {
@@ -103,7 +104,7 @@ public class PriorityMessageQueue {
 		//sum wait times 
 		for(Message m : output) {  
 			int p = m.getPriority(); //Queue specific avg
-			avgs[p] += m.getTimeOfArrival(); //fill first
+			avgs[p] += m.getArrivalTime(); //fill first
 			msgCount[p]++;	//keep track of how many messages in each queue
 		}
 				
@@ -112,7 +113,7 @@ public class PriorityMessageQueue {
 
 		for(int i = 0; i < avgs.length; i++ ) {
 			avgs[i] = (double) avgs[i] / numMessages;	//individual pq avg
-			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed";
+			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed: " ;
 		}
 		
 		return result;
