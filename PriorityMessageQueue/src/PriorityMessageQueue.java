@@ -74,21 +74,21 @@ public class PriorityMessageQueue {
 	//Process 
 	public void process() {
 		//Pre-populate
-		for(int i = 0; i < 10; i++ ) 
-			add (new Message(time++));	//Add 10 Messages to start
+		for(int i = 0; i < 4; i++ ) 
+			add(new Message(time++));	//Add 4 Messages to start */
 		
 		//Populate and process
-		while (time < limit) {	//Add another <limit = 10,000> Messages and begin to process
+		while( time < limit ) {	//Add another <limit = 10,000> Messages and begin to process
 			add(new Message( time++ ) ); //Add one new, random Message every minute and increment the time counter		//Confirmation # for boutineer 6146
 
-			if (time % 4 == 0)	//Remove the highest priority Message every 4 minutes
+			if( time % 4 == 0 )	//Remove the highest priority Message every 4 minutes
 				output.add( remove() );
 		}
 		
 		//Process until empty
 		while ( !isEmpty() ) {	//While the PMQ has Messages in it
-			output.add(remove() );	//Remove them in order of priority, and add to the output for calculations
-			time += 4;	//Increment time by 4 to continue to keep track of the avg wait time 
+			if(time++ % 4 == 0)	//Remove the highest priority Message every 4 minutes
+				output.add( remove() );
 		}
 		
 		//Analyze
@@ -112,8 +112,8 @@ public class PriorityMessageQueue {
 		result += "\n\t" + numMessages + " Messages processed in " + time + " minutes";
 
 		for(int i = 0; i < avgs.length; i++ ) {
-			avgs[i] = (double) avgs[i] / numMessages;	//individual pq avg
-			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed: " ;
+			avgs[i] = (double) avgs[i] / msgCount[i];	//individual pq avg
+			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed" ;
 		}
 		
 		return result;
