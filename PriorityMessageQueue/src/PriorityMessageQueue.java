@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 
 public class PriorityMessageQueue {
-	private static final int numQs = 5;
+	public static final int numQs = 5;
 	private int time;	//Keeps track of iterations/minutes elapsed in the processing of Messages
 	private int limit; //How long the PMQ will run (unless empty), before stopping the process
 	private ArrayList<Queue<Message>> Qs;//The Queues for Messages to be stored within
@@ -36,10 +36,15 @@ public class PriorityMessageQueue {
 	
 	//Peek -- returns highest priority message
 	public Message peek() {
-		for(Queue<Message> q : Qs) 	//For every Queue in Qs
-			if( !q.isEmpty() ) 	//Find first Queue that isn't empty
-				return q.peek();		//Return the highest priority item
-		
+		Queue<Message> q;
+		for(int i = 0; i < numQs; i++) { //force the order bc for each doesn't seem to be ordered
+			q = Qs.get(i);
+			if( !q.isEmpty() ) {
+				Message m = q.peek();
+				m.setWait(time);		//Calculate how long it has been waiting
+				return m;
+			}
+		}
 		throw new NoSuchElementException();	//If it iterates through all of them and they're all empty, throw exc.
 	}
 	
@@ -59,12 +64,10 @@ public class PriorityMessageQueue {
 			if( !q.isEmpty() ) {		//Find first Queue that isn't empty
 				Message m = q.peek();
 				m.setWait(time);		//Calculate how long it has been waiting
-				if(m.getArrivalTime() >= 4) {
+				if(m.getWait() >= 4) {
 					m = q.remove();
 					m.setWait(time);		//Calculate how long it has been waiting
 					return m; //Return the configured message 
-				} else { 
-					System.out.println( m );
 				}
 			}
 		}
@@ -74,20 +77,21 @@ public class PriorityMessageQueue {
 	//Process 
 	public void process() {
 		//Pre-populate
-		for(int i = 0; i < 4; i++ ) 
+		for(int i = 0; i < 14 ; i++ ) 
 			add(new Message(time++));	//Add 4 Messages to start */
 		
 		//Populate and process
 		while( time < limit ) {	//Add another <limit = 10,000> Messages and begin to process
 			add(new Message( time++ ) ); //Add one new, random Message every minute and increment the time counter		//Confirmation # for boutineer 6146
 
-			if( time % 4 == 0 )	//Remove the highest priority Message every 4 minutes
+			if(peek().getWait() >= 4 )	//Remove the highest priority Message that has been processed for >= 4 minutes
 				output.add( remove() );
 		}
 		
 		//Process until empty
 		while ( !isEmpty() ) {	//While the PMQ has Messages in it
-			if(time++ % 4 == 0)	//Remove the highest priority Message every 4 minutes
+			time++;
+			if(peek().getWait() >= 4 )	//Remove the highest priority Message that has been processed for >= 4 minutes
 				output.add( remove() );
 		}
 		
@@ -104,7 +108,7 @@ public class PriorityMessageQueue {
 		//sum wait times 
 		for(Message m : output) {  
 			int p = m.getPriority(); //Queue specific avg
-			avgs[p] += m.getArrivalTime(); //fill first
+			avgs[p] += m.getWait(); //fill first
 			msgCount[p]++;	//keep track of how many messages in each queue
 		}
 				
@@ -115,6 +119,10 @@ public class PriorityMessageQueue {
 			avgs[i] = (double) avgs[i] / msgCount[i];	//individual pq avg
 			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed" ;
 		}
+		
+		//comparison
+		double heapTime = (time * Math.log( (double) time) ) / numQs; //not sure if this is right...
+		result += "\n\n\tvs. Heap implementation: O(n log n) --> O(" + time + " log " + time + ") = " + heapTime +  " minutes";
 		
 		return result;
 	}

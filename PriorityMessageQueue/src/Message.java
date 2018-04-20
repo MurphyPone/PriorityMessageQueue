@@ -12,7 +12,7 @@ public class Message {
 	
 	//Default constructor assigns random priority
 	Message(int a) {
-		priority = (int) (Math.random() * 5); //random priority 0-4;
+		priority = (int) (Math.random() * PriorityMessageQueue.numQs); //random priority 0-numQs;
 		arrival = a;
 		content = "This Message has priority " + priority; 
 	}
@@ -27,16 +27,12 @@ public class Message {
 	public void setContent(String content) { this.content = content; }
 
 	public String toString() { return content; }
-	public void updateContent() { this.content += ", and waited " + this.wait + " minutes";  }
+	public void updateContent() { this.content = "This Message has priority " + priority +", and waited " + this.wait + " minutes";  }
 	
 	public void setWait(int t) { //"global" time passed from the PMQ
 		wait = t - arrival; //time spent waiting in the Queue
 		updateContent();
 	}
 	
-	public void setWait2(int t) {
-		this.wait = t;
-	}
-	
-	public int getArrivalTime() { return this.wait; }
+	public int getWait() { return this.wait; }
 }
