@@ -1,7 +1,7 @@
 /** 
  * Class Description: This class processes and analyzes the wait time of Messages of various priorities
  * @author MurphyP1
- * @date 4/21/18
+ * @date 4/22/18
  */
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -19,11 +19,11 @@ public class PriorityMessageQueue {
 	 * The default constructor for a PriorityMessageQueue which initializes the Queues, output, and limit for the PMQ as 10,000
 	 */
 	PriorityMessageQueue() {
-		Qs = new ArrayList<Queue<Message>>(numQs);	//Instantiate the Qs
+		Qs = new ArrayList<Queue<Message>>(numQs);	//Instantiate the ArrayList holding the Queues
 		for(int i = 0; i < numQs; i++)
-			Qs.add(new LinkedList<Message>() ); //Create 5 Queues
+			Qs.add(new LinkedList<Message>() ); //Create the Queues
 		time = 0; //keep track of the # minutes that have transpired 
-		limit = 10000; //minutes
+		limit = 10000; //minutes 
 		output = new ArrayList<Message>(limit); //save time resizing later
 	}
 
@@ -67,7 +67,6 @@ public class PriorityMessageQueue {
 		return true;		//if it iterates through all of them without breaking out, then they're all empty
 	}
 	
-	//Remove highest priority
 	/**
 	 * A standard Queue method which returns the Message of highest priority within the PMQ and removes it 
 	 * @return the Message with the highest priority (highest meaning "most", so highest priority = p0)
@@ -93,19 +92,14 @@ public class PriorityMessageQueue {
 	
 	/**
 	 * The operating method of the PMQ which 
-	 * 	1. Adds a few initial Messages to the PMQ
-	 * 	2. Continues to add messages until the limit has been reached while also removing the highest priority Message that has been 
-	 * 		waiting for at least four minutes
-	 * 	3. Removes all remaining Messages that have been waiting at least four minutes without adding any new Messages
+	 * 		1. Adds a few initial Messages to the PMQ 
+	 *		2. Continues to add messages until the limit has been reached while also removing the highest priority Message that has been waiting for at least four minutes
+	 * 		3. Removes all remaining Messages that have been waiting at least four minutes without adding any new Messages
 	 */
-	public void process() {
-		//Pre-populate
-		for(int i = 0; i < 14 ; i++ ) 
-			add(new Message(time++));	//Add 4 Messages to start */
-		
+	public void process() {	
 		//Populate and process
 		while( time < limit ) {	//Add another <limit = 10,000> Messages and begin to process
-			add(new Message( time++ ) ); //Add one new, random Message every minute and increment the time counter		//Confirmation # for boutineer 6146
+			add(new Message( time++ ) ); //Add one new, random Message every minute and increment the time counter	
 
 			if(peek().getWait() >= 4 )	//Remove the highest priority Message that has been processed for >= 4 minutes
 				output.add( remove() );
@@ -113,12 +107,12 @@ public class PriorityMessageQueue {
 		
 		//Process until empty
 		while ( !isEmpty() ) {	//While the PMQ has Messages in it
-			time++;
+			time++;	//Keep incrementing time 
 			if(peek().getWait() >= 4 )	//Remove the highest priority Message that has been processed for >= 4 minutes
 				output.add( remove() );
 		}
 		
-		//Analyze
+		//Analyze --> does not count towards Big-O run time of process, but is called within for concise testing
 		System.out.print( analyze() ); //After processing all, output analysis		
 	}
 	
@@ -140,22 +134,25 @@ public class PriorityMessageQueue {
 		}
 				
 		//Build String
-		result += "\n\t" + numMessages + " Messages processed in " + time + " minutes";
+		result += "\n\t" + numMessages + " Messages processed with " + numQs + " Queues in " + time + " minutes";
 
 		for(int i = 0; i < avgs.length; i++ ) {
-			avgs[i] = (double) avgs[i] / msgCount[i];	//individual pq avg
+			avgs[i] = (double) avgs[i] / msgCount[i];	//individual Queue avg
 			result += "\n\tp" + i + " avg: " + avgs[i] + " minutes, " + msgCount[i] + " Messages processed" ;
 		}
 		
 		//comparison
-		double heapTime = (time * Math.log( (double) time) ) / numQs; //not sure if this is right...
-		result += "\n\n\tvs. Heap implementation: O(n log n) --> O(" + time + " log " + time + ") = " + heapTime +  " minutes";
+		double heapTime = ((time * Math.log( (double) time) ) / Math.log(2)) / numQs; //convert from log base e to log base 2 for big O analysis (constants are negligible) 
+		result += "\n\n\t PMQ implementation: O(n) vs. Heap implementation: O(n log n) "
+				+ "\n\t--> O(" + time +") = " + time +" minutes vs. "
+						+ "O(" + time + " log " + time + ") = " + heapTime +  " minutes";
 		
 		return result;
 	}
 	
 	/**
 	 * Displays the size of each of the underlying Queues
+	 * @return a String of formatted information about the Queues
 	 */
 	public String toString() {
 		String result = "";

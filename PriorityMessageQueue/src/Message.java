@@ -1,7 +1,7 @@
 /** 
  * Class Description: This class represent a Message which arrives in a PriorityMessageQueue and keeps track of how long it waited in the Queue before getting delivered.
  * @author MurphyP1
- * @date 4/21/18
+ * @date 4/22/18
  */
 
 public class Message {
@@ -67,7 +67,7 @@ public class Message {
 	
 	/**
 	 * A getter method which returns a value representing how long a Message was waiting within a PMQ
-	 * @return
+	 * @return the wait time in minutes for the given Message
 	 */
 	public int getWait() { return this.wait; }
 }
