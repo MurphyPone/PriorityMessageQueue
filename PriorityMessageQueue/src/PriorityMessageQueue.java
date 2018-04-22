@@ -1,7 +1,7 @@
 /** 
- * Class Description: This class does XYZ
+ * Class Description: This class processes and analyzes the wait time of Messages of various priorities
  * @author MurphyP1
- * @date 4/16/18
+ * @date 4/21/18
  */
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -9,13 +9,15 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 
 public class PriorityMessageQueue {
-	public static final int numQs = 5;
+	public static final int numQs = 5; //Number of Queues supported by the PMQ
 	private int time;	//Keeps track of iterations/minutes elapsed in the processing of Messages
 	private int limit; //How long the PMQ will run (unless empty), before stopping the process
 	private ArrayList<Queue<Message>> Qs;//The Queues for Messages to be stored within
-	private ArrayList<Message> output;
+	private ArrayList<Message> output; //All Messages are sent here for analysis after being processed
 
-	//Constructor
+	/**
+	 * The default constructor for a PriorityMessageQueue which initializes the Queues, output, and limit for the PMQ as 10,000
+	 */
 	PriorityMessageQueue() {
 		Qs = new ArrayList<Queue<Message>>(numQs);	//Instantiate the Qs
 		for(int i = 0; i < numQs; i++)
@@ -25,16 +27,22 @@ public class PriorityMessageQueue {
 		output = new ArrayList<Message>(limit); //save time resizing later
 	}
 
-	//QUEUE Methods//
-	
-	//Add -- according to Message priority
+	//Standard Queue Methods//
+
+	/** 
+	 * A standard Queue method which adds a Message into the PMQ according to its respective priority
+	 * @param m the Message to be added
+	 */ 
 	public void add( Message m ) {
 		int p = m.getPriority();	//get priority of item to be added
 		Queue<Message> pq = Qs.get(p);	//Get the specific PriorityQueue
 		pq.add(m);	//Add the message to the Queue (LinkedList) associated with that priority 
 	}
 	
-	//Peek -- returns highest priority message
+	/**
+	 * A standard Queue method which returns the Message of highest priority within the PMQ without removing it 
+	 * @return the Message with the highest priority (highest meaning "most", so highest priority = p0)
+	 */
 	public Message peek() {
 		Queue<Message> q;
 		for(int i = 0; i < numQs; i++) { //force the order bc for each doesn't seem to be ordered
@@ -48,7 +56,10 @@ public class PriorityMessageQueue {
 		throw new NoSuchElementException();	//If it iterates through all of them and they're all empty, throw exc.
 	}
 	
-	//isEmpty --> returns true if ALL queues are empty
+	/**
+	 * A standard Queue method which returns true if all of the underlying Queues are empty
+	 * @return true if all are empty, false if any are not empty
+	 */
 	public boolean isEmpty() {
 		for(Queue<Message> q : Qs) //For every Queue in Qs
 			if( !q.isEmpty() )	//If any of them are not empty
@@ -57,6 +68,10 @@ public class PriorityMessageQueue {
 	}
 	
 	//Remove highest priority
+	/**
+	 * A standard Queue method which returns the Message of highest priority within the PMQ and removes it 
+	 * @return the Message with the highest priority (highest meaning "most", so highest priority = p0)
+	 */
 	public Message remove() {
 		Queue<Message> q;
 		for(int i = 0; i < numQs; i++) { //force the order bc for each doesn't seem to be ordered
@@ -74,7 +89,15 @@ public class PriorityMessageQueue {
 		throw new NoSuchElementException();
 	}
 	
-	//Process 
+	//Additional PMQ Methods
+	
+	/**
+	 * The operating method of the PMQ which 
+	 * 	1. Adds a few initial Messages to the PMQ
+	 * 	2. Continues to add messages until the limit has been reached while also removing the highest priority Message that has been 
+	 * 		waiting for at least four minutes
+	 * 	3. Removes all remaining Messages that have been waiting at least four minutes without adding any new Messages
+	 */
 	public void process() {
 		//Pre-populate
 		for(int i = 0; i < 14 ; i++ ) 
@@ -99,7 +122,11 @@ public class PriorityMessageQueue {
 		System.out.print( analyze() ); //After processing all, output analysis		
 	}
 	
-	public String analyze() {
+	/**
+	 * An additional helper method which returns describes the average wait time and Message distribution for each each underlying Queue 
+	 * @return a String with analysis 
+	 */
+	private String analyze() {
 		String result = "PriorityMessageQueue wait time analysis:";
 		int numMessages = output.size(); //Tracks total # messages processed
 		double[] avgs = new double[numQs]; //stores the avg time for Messages within each of the individual pQueues
@@ -127,7 +154,9 @@ public class PriorityMessageQueue {
 		return result;
 	}
 	
-	//toString 
+	/**
+	 * Displays the size of each of the underlying Queues
+	 */
 	public String toString() {
 		String result = "";
 		int i = 0;
@@ -136,6 +165,10 @@ public class PriorityMessageQueue {
 		return result;
 	}
 	
+	/**
+	 * The standard testing method
+	 * @param args a String array which contains arguments passed in by the command line
+	 */
 	public static void main(String[] args) {
 		PriorityMessageQueue x = new PriorityMessageQueue(); //test PMQ
 		x.process();
